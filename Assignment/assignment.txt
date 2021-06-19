@@ -1,0 +1,19 @@
+*) Write Character driver which should generate fibbonaci series and returns to userspace.
+
+*) Write Calculator to support addition and division to userspace via ioctl calls.
+
+*) Write character driver to control GPIO and turnon LED
+
+*) Write character driver to read switch connected to GPIO.
+
+*) Create proc filesystem print command line information 
+
+*) Write a kernel module to access current task_struct and print name and pid of the current process and its parent process.
+
+*) Write a kernel module to print uid and gid of current process.
+
+*) Write a kernel module to walk to the process tree starting from current process until you reach the process with pid 0
+
+*) Add your own syscall in kernel to print hello world
+
+*) 
