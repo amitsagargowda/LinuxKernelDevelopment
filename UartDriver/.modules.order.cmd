@@ -1,1 +1,0 @@
-cmd_/media/sf_shared/git/LinuxKernelDevelopment/UartDriver/modules.order := {   echo /media/sf_shared/git/LinuxKernelDevelopment/UartDriver/test_serial.ko; :; } | awk '!x[$$0]++' - > /media/sf_shared/git/LinuxKernelDevelopment/UartDriver/modules.order

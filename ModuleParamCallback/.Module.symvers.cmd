@@ -1,1 +1,0 @@
-cmd_/media/sf_shared/git/LinuxKernelDevelopment/ModuleParamCallback/Module.symvers := sed 's/ko$$/o/' /media/sf_shared/git/LinuxKernelDevelopment/ModuleParamCallback/modules.order | scripts/mod/modpost -m -a   -o /media/sf_shared/git/LinuxKernelDevelopment/ModuleParamCallback/Module.symvers -e -i Module.symvers   -T -

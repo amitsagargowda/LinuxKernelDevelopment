@@ -1,1 +1,0 @@
-cmd_/media/sf_shared/git/LinuxKernelDevelopment/UartDriver/Module.symvers := sed 's/ko$$/o/' /media/sf_shared/git/LinuxKernelDevelopment/UartDriver/modules.order | scripts/mod/modpost -m -a   -o /media/sf_shared/git/LinuxKernelDevelopment/UartDriver/Module.symvers -e -i Module.symvers   -T -
