@@ -1,0 +1,1 @@
+cmd_/media/sf_shared/git/LinuxKernelDevelopment/ModuleParamCallback/callback1.mod := { echo  /media/sf_shared/git/LinuxKernelDevelopment/ModuleParamCallback/callback1.o;  echo; } > /media/sf_shared/git/LinuxKernelDevelopment/ModuleParamCallback/callback1.mod

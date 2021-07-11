@@ -1,0 +1,1 @@
+cmd_/media/sf_shared/git/LinuxKernelDevelopment/UartDriver/built-in.a := rm -f /media/sf_shared/git/LinuxKernelDevelopment/UartDriver/built-in.a; ar cDPrST /media/sf_shared/git/LinuxKernelDevelopment/UartDriver/built-in.a 
