@@ -1,0 +1,1 @@
+cmd_/media/sf_shared/git/LinuxKernelDevelopment/Mutex/mtx1.mod := { echo  /media/sf_shared/git/LinuxKernelDevelopment/Mutex/mtx1.o;  echo; } > /media/sf_shared/git/LinuxKernelDevelopment/Mutex/mtx1.mod

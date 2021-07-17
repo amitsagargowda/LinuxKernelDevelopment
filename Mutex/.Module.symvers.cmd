@@ -1,0 +1,1 @@
+cmd_/media/sf_shared/git/LinuxKernelDevelopment/Mutex/Module.symvers := sed 's/ko$$/o/' /media/sf_shared/git/LinuxKernelDevelopment/Mutex/modules.order | scripts/mod/modpost -m -a   -o /media/sf_shared/git/LinuxKernelDevelopment/Mutex/Module.symvers -e -i Module.symvers   -T -

@@ -1,0 +1,1 @@
+cmd_/media/sf_shared/git/LinuxKernelDevelopment/IRQ/irq1.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id=sha1  -T ./scripts/module-common.lds -o /media/sf_shared/git/LinuxKernelDevelopment/IRQ/irq1.ko /media/sf_shared/git/LinuxKernelDevelopment/IRQ/irq1.o /media/sf_shared/git/LinuxKernelDevelopment/IRQ/irq1.mod.o;  true
