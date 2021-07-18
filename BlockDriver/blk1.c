@@ -249,7 +249,7 @@ int blk1_ioctl (struct block_device *bdev, fmode_t mode,
 static struct block_device_operations blk1_ops = {
 	.owner           = THIS_MODULE,
 	.open 	         = blk1_open,
-	.release 	 = blk1_release,
+	.release 	 	 = blk1_release,
 	.media_changed   = blk1_media_changed, 
 	.revalidate_disk = blk1_revalidate,
 	.ioctl	         = blk1_ioctl
