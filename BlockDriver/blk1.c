@@ -36,13 +36,11 @@ enum {
 	RM_FULL    = 1,	/* The full-blown version */
 	RM_NOQUEUE = 2,	/* Use make_request */
 };
-static int request_mode = RM_SIMPLE;
-module_param(request_mode, int, 0);
 
 /*
  * Minor number and partition management.
  */
-#define SBULL_MINORS	16
+#define BLK1_MINORS	16
 #define MINOR_SHIFT	4
 #define DEVNUM(kdevnum)	(MINOR(kdev_t_to_nr(kdevnum)) >> MINOR_SHIFT
 
@@ -134,84 +132,6 @@ static blk_status_t blk1_request(struct blk_mq_hw_ctx *hctx, const struct blk_mq
 done:
 	blk_mq_end_request (req, ret);
 	return ret;
-}
-
-
-/*
- * Transfer a single BIO.
- */
-static int blk1_xfer_bio(struct blk1_dev *dev, struct bio *bio)
-{
-	struct bio_vec bvec;
-	struct bvec_iter iter;
-	sector_t sector = bio->bi_iter.bi_sector;
-
-	/* Do each segment independently. */
-	bio_for_each_segment(bvec, bio, iter) {
-		char *buffer = kmap_atomic(bvec.bv_page) + bvec.bv_offset;
-		blk1_transfer(dev, sector, (bio_cur_bytes(bio) / KERNEL_SECTOR_SIZE),
-				buffer, bio_data_dir(bio) == WRITE);
-		sector += (bio_cur_bytes(bio) / KERNEL_SECTOR_SIZE);
-		kunmap_atomic(buffer);
-	}
-	return 0; /* Always "succeed" */
-}
-
-/*
- * Transfer a full request.
- */
-static int blk1_xfer_request(struct blk1_dev *dev, struct request *req)
-{
-	struct bio *bio;
-	int nsect = 0;
-    
-	__rq_for_each_bio(bio, req) {
-		blk1_xfer_bio(dev, bio);
-		nsect += bio->bi_iter.bi_size/KERNEL_SECTOR_SIZE;
-	}
-	return nsect;
-}
-
-
-
-/*
- * Smarter request function that "handles clustering".
- */
-static blk_status_t blk1_full_request(struct blk_mq_hw_ctx * hctx, const struct blk_mq_queue_data * bd)
-{
-	struct request *req = bd->rq;
-	int sectors_xferred;
-	struct blk1_dev *dev = req->q->queuedata;
-	blk_status_t  ret;
-
-	blk_mq_start_request (req);
-	if (blk_rq_is_passthrough(req)) {
-		printk (KERN_NOTICE "Skip non-fs request\n");
-		ret = BLK_STS_IOERR; //-EIO;
-		goto done;
-	}
-	sectors_xferred = blk1_xfer_request(dev, req);
-	ret = BLK_STS_OK; 
-done:
-	blk_mq_end_request (req, ret);
-
-	return ret;
-}
-
-
-
-/*
- * The direct make request version.
- */
-static blk_qc_t blk1_make_request(struct request_queue *q, struct bio *bio)
-{
-	struct blk1_dev *dev = bio->bi_disk->private_data;
-	int status;
-
-	status = blk1_xfer_bio(dev, bio);
-	bio->bi_status = status;
-	bio_endio(bio);
-	return BLK_QC_T_NONE;
 }
 
 
@@ -339,11 +259,6 @@ static struct blk_mq_ops mq_ops_simple = {
     .queue_rq = blk1_request,
 };
 
-static struct blk_mq_ops mq_ops_full = {
-    .queue_rq = blk1_full_request,
-};
-
-
 /*
  * Set up our internal device.
  */
@@ -371,39 +286,22 @@ static void setup_device(struct blk1_dev *dev)
 	 * The I/O queue, depending on whether we are using our own
 	 * make_request function or not.
 	 */
-	switch (request_mode) {
-	    case RM_NOQUEUE:
-		dev->queue =  blk_generic_alloc_queue(blk1_make_request, NUMA_NO_NODE);
-		if (dev->queue == NULL)
-			goto out_vfree;
-		break;
-
-	    case RM_FULL:
-		dev->queue = blk_mq_init_sq_queue(&dev->tag_set, &mq_ops_full, 128, BLK_MQ_F_SHOULD_MERGE);
-		if (dev->queue == NULL)
-			goto out_vfree;
-		break;
-
-	    case RM_SIMPLE:
-		dev->queue = blk_mq_init_sq_queue(&dev->tag_set, &mq_ops_simple, 128, BLK_MQ_F_SHOULD_MERGE);
-		if (dev->queue == NULL)
-			goto out_vfree;
-		break;
-            default:
-                printk(KERN_NOTICE "Bad request mode %d, using simple\n", request_mode);
-	}
+	dev->queue = blk_mq_init_sq_queue(&dev->tag_set, &mq_ops_simple, 128, BLK_MQ_F_SHOULD_MERGE);
+	if (dev->queue == NULL)
+		goto out_vfree;
+	
 	blk_queue_logical_block_size(dev->queue, hardsect_size);
 	dev->queue->queuedata = dev;
 	/*
 	 * And the gendisk structure.
 	 */
-	dev->gd = alloc_disk(SBULL_MINORS);
+	dev->gd = alloc_disk(BLK1_MINORS);
 	if (! dev->gd) {
 		printk (KERN_NOTICE "alloc_disk failure\n");
 		goto out_vfree;
 	}
 	dev->gd->major = blk1_major;
-	dev->gd->first_minor = SBULL_MINORS;
+	dev->gd->first_minor = BLK1_MINORS;
 	dev->gd->fops = &blk1_ops;
 	dev->gd->queue = dev->queue;
 	dev->gd->private_data = dev;
@@ -456,10 +354,7 @@ static void blk1_exit(void)
 	}
 
 	if (dev->queue) {
-		if (request_mode == RM_NOQUEUE)
-			blk_put_queue(dev->queue);
-		else
-			blk_cleanup_queue(dev->queue);
+		blk_cleanup_queue(dev->queue);
 	}
 
 	if (dev->data)
