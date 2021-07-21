@@ -34,6 +34,8 @@ static int worker_task_handler_fn(void *arguments)
 
 	do_exit(0);
 
+	worker_task=NULL;
+
 	printk(KERN_ALERT "Worker task exiting\n");
 	return 0;
 }
@@ -55,6 +57,8 @@ static int default_task_handler_fn(void *arguments)
 	printk(KERN_ALERT "Default task exiting\n");
 
 	do_exit(0);
+
+	default_task=NULL;
 
 	return 0;
 }

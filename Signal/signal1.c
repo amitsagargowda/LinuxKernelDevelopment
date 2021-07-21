@@ -8,7 +8,6 @@
 #include<linux/slab.h>                 //kmalloc()
 #include<linux/uaccess.h>              //copy_to/from_user()
 #include <linux/ioctl.h>
-#include <linux/interrupt.h>
 #include <asm/io.h>
  
 #define SIGTEST 44
@@ -45,27 +44,6 @@ static struct file_operations fops =
         .release        = test_release,
 };
  
-//Interrupt handler for IRQ 11. 
-static irqreturn_t irq_handler(int irq,void *dev_id) {
-    struct kernel_siginfo info;
-    printk(KERN_INFO "Shared IRQ: Interrupt Occurred");
-    
-    //Sending signal to app
-    memset(&info, 0, sizeof(struct kernel_siginfo));
-    info.si_signo = SIGTEST;
-    info.si_code = SI_QUEUE;
-    info.si_int = 1;
- 
-    if (task != NULL) {
-        printk(KERN_INFO "Sending signal to app\n");
-        if(send_sig_info(SIGTEST, &info, task) < 0) {
-            printk(KERN_INFO "Unable to send signal\n");
-        }
-    }
- 
-    return IRQ_HANDLED;
-}
- 
 static int test_open(struct inode *inode, struct file *file)
 {
     printk(KERN_INFO "Device File Opened...!!!\n");
@@ -88,8 +66,6 @@ static ssize_t test_read(struct file *filp, char __user *buf, size_t len, loff_t
 {
 	struct kernel_siginfo info;
     printk(KERN_INFO "Read Function\n");
- //   asm("int $0x3B");  //Triggering Interrupt. Corresponding to irq 11
- //
 
     //Sending signal to app
     memset(&info, 0, sizeof(struct kernel_siginfo));
@@ -154,15 +130,8 @@ static int __init test_driver_init(void)
         goto r_device;
     }
  
-    if (request_irq(IRQ_NO, irq_handler, IRQF_SHARED, "test_device", (void *)(irq_handler))) {
-        printk(KERN_INFO "my_device: cannot register IRQ ");
-        goto irq;
-    }
- 
     printk(KERN_INFO "Device Driver Insert...Done!!!\n");
     return 0;
-irq:
-    free_irq(IRQ_NO,(void *)(irq_handler));
 r_device:
     class_destroy(dev_class);
 r_class:
@@ -172,7 +141,6 @@ r_class:
  
 static void __exit test_driver_exit(void)
 {
-    free_irq(IRQ_NO,(void *)(irq_handler));
     device_destroy(dev_class,dev);
     class_destroy(dev_class);
     cdev_del(&test_cdev);
