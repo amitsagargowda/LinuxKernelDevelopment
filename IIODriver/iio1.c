@@ -9,6 +9,7 @@
 #include <linux/iio/events.h> /* For advanced users, to manage iio events */
 #include <linux/iio/buffer.h>  /* mandatory to use triggered buffers */
 
+MODULE_INFO(intree, "Y");
 
 #define FAKE_VOLTAGE_CHANNEL(num)   \
 	{                               \

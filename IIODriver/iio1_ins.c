@@ -23,3 +23,4 @@ module_init(fake_iio_add);
 module_exit(fake_iio_put);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("test");
+MODULE_INFO(intree, "Y");
