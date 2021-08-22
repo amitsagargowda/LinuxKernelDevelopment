@@ -1,4 +1,5 @@
-obj-m	+= pci1.o
+obj-m	+= pci1.o 
+#obj-m   += pci2.o
 
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 PWD       := $(shell pwd)
